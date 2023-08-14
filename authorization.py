@@ -38,7 +38,7 @@ def create_connection():
 #         return f'Error connecting to PostgreSQL: {error}'
 
 
-@app.route('/POST/users', methods=['GET', 'POST'])
+@app.route('/users', methods=['GET', 'POST'])
 def registration():
     user = request.get_json()
     first_name = user['firstName']
@@ -54,7 +54,7 @@ def registration():
     connection.commit()
 
     cursor.close()
-    # connection.close()
+    connection.close()
 
     return {'First Name: ': first_name,
             'Last Name: ': last_name,
@@ -72,6 +72,28 @@ def registration():
     #             }
     # else:
     #     return ['Wrong http method']
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    user = request.get_json()
+    email = user['email']
+    password = user['password']
+
+    connection = create_connection()
+    cursor = connection.cursor()
+
+    insert_query = 'SELECT email FROM users WHERE email = %s AND password = %s'
+    cursor.execute(insert_query, (email, password))
+    result = cursor.fetchone()
+
+    if result:
+        return {'Login status: ': 'Login successful'}
+    else:
+        return {'Login status: ': 'Login failed'}
+
+    cursor.close()
+    connection.close()
 
 
 # if __name__ == '__main__':
